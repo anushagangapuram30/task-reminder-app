@@ -1,11 +1,18 @@
-# Use Nginx official image (lightweight, no JS runtime)
-FROM nginx:alpine
+# Use Node.js official image
+FROM node:18-alpine
 
-# Copy your HTML file to Nginx's serving directory
-COPY taskreminder.html /usr/share/nginx/html/index.html
+# Set working directory
+WORKDIR /app
 
-# Expose port 80 (Nginx default)
-EXPOSE 80
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
 
-# Start Nginx (serves the HTML at the root)
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the rest of the app (including index.html, server.js, etc.)
+COPY . .
+
+# Expose port 3000 (for the backend server)
+EXPOSE 3000
+
+# Start the app
+CMD ["npm", "start"]
