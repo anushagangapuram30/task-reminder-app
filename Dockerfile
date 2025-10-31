@@ -1,7 +1,10 @@
 FROM nginx:alpine
-WORKDIR /usr/share/nginx/html
-RUN rm -rf ./*
-COPY Taskreminder.html ./index.html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the HTML file to Nginx's default serving directory
+COPY Taskreminder.html /usr/share/nginx/html/index.html
+
+# Expose port 80
 EXPOSE 80
+
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

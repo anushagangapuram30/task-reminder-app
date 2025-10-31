@@ -1,29 +1,47 @@
 pipeline {
     agent any
+    
+    environment {
+        DOCKER_IMAGE = 'task-reminder-app'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+    }
+    
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/anushagangapuram30/task-reminder-app.git'
+                checkout scm
             }
         }
+        
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build('taskreminder-static:latest')
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
+        
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker run -d -p 80:80 --name taskreminder-static taskreminder-static:latest'
+                    // Stop any running container with the same name
+                    sh "docker stop ${DOCKER_IMAGE} || true"
+                    sh "docker rm ${DOCKER_IMAGE} || true"
+                    
+                    // Run the new container
+                    sh "docker run -d -p 80:80 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
     }
+    
     post {
-        always {
-            cleanWs()
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
         }
     }
 }
