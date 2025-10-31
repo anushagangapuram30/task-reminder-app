@@ -9,29 +9,31 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/anushagangapuram30/task-reminder-app.git'
             }
         }
         
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-                }
+                bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
             }
         }
         
         stage('Deploy') {
             steps {
-                script {
-                    // Stop any running container with the same name
-                    sh "docker stop ${DOCKER_IMAGE} || true"
-                    sh "docker rm ${DOCKER_IMAGE} || true"
-                    
-                    // Run the new container
-                    sh "docker run -d -p 80:80 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:latest"
-                }
+                // Stop any running container with the same name
+                bat "docker stop ${DOCKER_IMAGE} || true"
+                bat "docker rm ${DOCKER_IMAGE} || true"
+                
+                // Run the new container
+                bat "docker run -d -p 80:80 --name ${DOCKER_IMAGE} ${DOCKER_IMAGE}:latest"
             }
         }
     }
